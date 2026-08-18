@@ -44,7 +44,9 @@ public class VulnApp extends SpringBootServletInitializer {
         Pattern.CASE_INSENSITIVE
     );
 
-    final static double MAX_ORACLE_SLEEP_SECONDS = 10.0;
+    final static double MAX_ORACLE_SLEEP_SECONDS = 60.0;
+
+    static final long ORACLE_TIMING_MARGIN_MILLIS = 1500L;
 
     final static long LEGACY_ORACLE_SLEEP_MILLIS = 5000L;
 
@@ -359,11 +361,14 @@ public class VulnApp extends SpringBootServletInitializer {
             if (name == null) {
                 return new ResponseEntity<>(result, HttpStatus.OK);
             }
+            System.out.println("Oracle SQLi param name = " + name);
             final Matcher oracleSleep = ORACLE_SLEEP_PATTERN.matcher(name);
             if (oracleSleep.find()) {
                 final double requestedSeconds = Double.parseDouble(oracleSleep.group(1));
-                final long sleepMillis = (long) (
-                    Math.min(requestedSeconds, MAX_ORACLE_SLEEP_SECONDS) * 1000L
+                final double boundedSeconds = Math.min(requestedSeconds, MAX_ORACLE_SLEEP_SECONDS);
+                final long sleepMillis = Math.round(boundedSeconds * 1000L) + ORACLE_TIMING_MARGIN_MILLIS;
+                System.out.println(
+                    "Oracle SQLi sleep requested=" + requestedSeconds + "s, actual=" + sleepMillis + "ms"
                 );
                 sleep(sleepMillis);
             } else if (name.contains("UTL_INADDR.get_host_name(")) {
