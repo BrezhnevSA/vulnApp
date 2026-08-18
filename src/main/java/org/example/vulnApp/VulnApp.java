@@ -50,6 +50,14 @@ public class VulnApp extends SpringBootServletInitializer {
 
     final static long LEGACY_ORACLE_SLEEP_MILLIS = 5000L;
 
+    final static Pattern SQLITE_RANDOMBLOB_PATTERN = Pattern.compile(
+        "randomblob\\s*\\(\\s*(\\d+)\\s*\\)",
+        Pattern.CASE_INSENSITIVE
+    );
+
+    final static long SQLITE_MIN_RANDOMBLOB_BYTES = 100_000L;
+    final static long SQLITE_MAX_SLEEP_MILLIS = 8_000L;
+
     final Set<String> payloadSent = new HashSet<>();
 
     final List<SomeObject> commentRepository = new ArrayList<>();
@@ -479,8 +487,18 @@ public class VulnApp extends SpringBootServletInitializer {
         )  {
             final var result = new Response();
             result.test = "<html><body></body></html>";
-            if (name != null && name.contains("randomblob(")) {
-                result.test = "<html><body>SQL error: no such function: randomblob</body></html>";
+            if (name == null) {
+                return new ResponseEntity<>(result, HttpStatus.OK);
+            }
+            System.out.println("SQLite SQLi param name = " + name);
+            final Matcher randomblob = SQLITE_RANDOMBLOB_PATTERN.matcher(name);
+            if (randomblob.find()) {
+                final long blobBytes = Long.parseLong(randomblob.group(1));
+                final long sleepMillis = sqliteRandomblobDelayMillis(blobBytes);
+                System.out.println(
+                    "SQLite SQLi randomblob bytes=" + blobBytes + ", sleep=" + sleepMillis + "ms"
+                );
+                sleep(sleepMillis);
             }
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
@@ -500,6 +518,24 @@ public class VulnApp extends SpringBootServletInitializer {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }
+
+        private long sqliteRandomblobDelayMillis(long blobBytes) {
+            if (blobBytes < SQLITE_MIN_RANDOMBLOB_BYTES) {
+                return 0L;
+            }
+            /*
+             * ZAP try this:
+             * randomblob(100000)
+             * randomblob(1000000)
+             * randomblob(10000000)
+             * We need to increase waiting time, but not over 10 seconds,
+             * because ZAP restrict SQLite timing check ~ 10 seconds.
+             */
+            final double ratio = (double) blobBytes / SQLITE_MIN_RANDOMBLOB_BYTES;
+            final double step = Math.max(1.0, Math.log10(ratio) + 1.0);
+            final long delayMillis = Math.round(step * 900L);
+            return Math.min(delayMillis, SQLITE_MAX_SLEEP_MILLIS);
         }
     }
 }
