@@ -30,9 +30,8 @@ docker build -f dockerfile/local.dockerfile -t vulnapp .
 ```
 
 - Go to http://localhost:8090/app/swagger-ui/index.html and download openapi file or get from root folder `openapi.json` file
-
-
 - For start scan use url http://vulnapp:8080 and set openapi file
+- After scan use GET /clearData for reset app for defaults
 
 ### Already built image in root - `image.tar`
 
