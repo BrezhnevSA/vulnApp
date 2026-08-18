@@ -33,8 +33,6 @@ docker build -f dockerfile/local.dockerfile -t vulnapp .
 - For start scan use url http://vulnapp:8080 and set openapi file
 - After scan use GET /clearData for reset app for defaults
 
-### Already built image in root - `image.tar`
-
 ### OpenAPI
 
 http://localhost:8090/app/v3/api-docs
