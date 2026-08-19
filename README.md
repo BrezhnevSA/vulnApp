@@ -35,36 +35,36 @@ Mocked alerts (!!! - temporary not found by scan, in dev):
 
 ### Code execution / template / command injection
 
-| ID / AlertRef | Alert name                                      | Where catch                              |
-|---------------|-------------------------------------------------|------------------------------------------|
-| 90019-1       | Server Side Code Injection - PHP Code Injection | /app/vulnApp/serverSideCodeInjection     |
-| 90020         | Remote OS Command Injection                     | /app/vulnApp/osCommandInjection          |
-| 90037         | Remote OS Command Injection (Time Based)        | /app/vulnApp/osCommandInjectionTimeBased |
-| 90035         | Server Side Template Injection                  | /app/vulnApp/serverSideTemplateInjection |
-| 90036         | Server Side Template Injection (Blind)          | /app/vulnApp/serverSideTemplateInjection |
-| 90025         | !!! Expression Language Injection               | /app/vulnApp/expressionLanguageInjection |
-| 90024         | Generic Padding Oracle                          | /app/vulnApp/paddingOracle               |
+| ID / AlertRef | Alert name                                      | Where catch                                                                        |
+|---------------|-------------------------------------------------|------------------------------------------------------------------------------------|
+| 90019-1       | Server Side Code Injection - PHP Code Injection | /app/vulnApp/serverSideCodeInjection                                               |
+| 90020         | Remote OS Command Injection                     | /app/vulnApp/osCommandInjection                                                    |
+| 90037         | Remote OS Command Injection (Time Based)        | /app/vulnApp/osCommandInjectionTimeBased                                           |
+| 90035         | Server Side Template Injection                  | /app/vulnApp/serverSideTemplateInjection                                           |
+| 90036         | Server Side Template Injection (Blind)          | /app/vulnApp/serverSideTemplateInjection                                           |
+| 90025         | Expression Language Injection                   | /app/vulnApp/expressionLanguageInjection /app/vulnApp/serverSideTemplateInjection  |
+| 90024         | Generic Padding Oracle                          | /app/vulnApp/paddingOracle                                                         |
 
 ### LDAP / NoSQL / SSRF-cloud
 
-| ID / AlertRef | Alert name                                 | Where catch                      |
-|---------------|--------------------------------------------|----------------------------------|
-| 40015         | LDAP Injection                             | /app/vulnApp/ldapInjection       |
-| 40033         | !!! NoSQL Injection - MongoDB              | /app/vulnApp/noSqlInjectionMongo |
-| 90039         | !!! NoSQL Injection - MongoDB (Time Based) | /app/vulnApp/noSqlInjectionMongo |
-| 90034         | !!! Cloud Metadata Potentially Exposed     | /app/vulnApp/ssrf                |
+| ID / AlertRef | Alert name                             | Where catch                                                              |
+|---------------|----------------------------------------|--------------------------------------------------------------------------|
+| 40015         | LDAP Injection                         | /app/vulnApp/ldapInjection                                               |
+| 40033         | NoSQL Injection - MongoDB              | /app/vulnApp/noSqlInjectionMongo                                         |
+| 90039         | NoSQL Injection - MongoDB (Time Based) | /app/vulnApp/sqlInjectionMySqlTimeBased /app/vulnApp/noSqlInjectionMongo |
+| 90034         | !!! Cloud Metadata Potentially Exposed | /app/vulnApp/ssrf                                                        |
 
 ### Web misconfiguration / active checks
 
-| ID / AlertRef     | Alert name                              | Where catch                     |
-|-------------------|-----------------------------------------|---------------------------------|
-| 20019-1 / 20019-2 | External Redirect                       | /app/vulnApp/externalRedirect   |
-| 40040-*           | !!! CORS Misconfiguration / CORS Header | /app/vulnApp/cors               |
-| 40008             | Parameter Tampering                     | /app/vulnApp/parameterTampering |
-| 30001             | Buffer Overflow                         | /app/vulnApp/bufferOverflow     |
-| 30002             | Format String Error                     | /app/vulnApp/externalRedirect   |
-| 90024             | !!! Generic Padding Oracle              | /app/vulnApp/paddingOracle      |
-| 90028             | !!! Insecure HTTP Method                | /app/vulnApp/insecureMethod     |
+| ID / AlertRef     | Alert name                 | Where catch                     |
+|-------------------|----------------------------|---------------------------------|
+| 20019-1 / 20019-2 | External Redirect          | /app/vulnApp/externalRedirect   |
+| 40040             | CORS Misconfiguration      | /app/vulnApp/cors               |
+| 40008             | Parameter Tampering        | /app/vulnApp/parameterTampering |
+| 30001             | Buffer Overflow            | /app/vulnApp/bufferOverflow     |
+| 30002             | Format String Error        | /app/vulnApp/externalRedirect   |
+| 90024             | !!! Generic Padding Oracle | /app/vulnApp/paddingOracle      |
+| 90028             | !!! Insecure HTTP Method   | /app/vulnApp/insecureMethod     |
 
 ### Resource disclosure / hidden files
 
@@ -108,6 +108,10 @@ Mocked alerts (!!! - temporary not found by scan, in dev):
 | 10038         | Application Error Disclosure                                             | /app/vulnApp/passive/errorWithoutNosniff                                     |
 | 10202         | Absence of Anti-CSRF Tokens                                              | /app/ /app/vulnApp                                                           |
 | 100044-3      | Suspicious Input Transformation - Expression Evaluation                  | /app/vulnApp/serverSideTemplateInjection                                     |
+| 43            | Source Code Disclosure - File Inclusion                                  | different                                                                    |
+| 30003         | Integer Overflow Error                                                   | /app/vulnApp/paddingOracle                                                   |
+| 90027         | Cookie Slack Detector                                                    | different                                                                    |
+| 90028-1       | Insecure HTTP Method - DELETE                                            | /app/vulnApp/insecureMethod                                                  |
 
 ### **How to run locally:**
 
