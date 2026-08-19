@@ -14,17 +14,16 @@ Mocked alerts (!!! - temporary not found by scan, in dev):
 |40021 |	SQL Injection - Oracle (Time Based) |	/vulnApp/sqlInjectionOracleTimeBased |
 |40022 |	SQL Injection - PostgreSQL (Time Based) |	/vulnApp/sqlInjectionPostgres |
 |40027 |	SQL Injection - MsSQL (Time Based) |	/vulnApp/sqlInjectionMsSqlTimeBased |
-|40024-2 |	SQL Injection - SQLite (Time Based) |	/vulnApp/sqlInjectionSqLite /vulnApp/sqlInjectionSqLiteTimeBased |
-|40024-1 |	SQL Injection - SQLite (Time Based) |	/vulnApp/sqlInjectionSqLiteError |
+|40024 |	SQL Injection - SQLite (Time Based) |	/vulnApp/sqlInjectionSqLite /vulnApp/sqlInjectionSqLiteTimeBased /vulnApp/sqlInjectionSqLiteError |
 
 ### XSS
 
 | ID / AlertRef | Alert name | Where catch |
 |---|---|---|
-|40012 |	Cross Site Scripting (Reflected) |	/vulnApp/cssw/html |
-|40012 | or JSON-based reflected -	Cross Site Scripting (Reflected) / reflected weakness |	/vulnApp/cssw |
-|40014 |	Cross Site Scripting (Persistent) |	/event |
-|40014-2 |	Cross Site Scripting Weakness (Persistent in JSON Response) |	/comment  |
+|40012 | Cross Site Scripting (Reflected) |	/vulnApp/cssw/html |
+|40012 | Cross Site Scripting Weakness (Reflected in JSON Response) |	/vulnApp/cssw |
+|40014 | Cross Site Scripting (Persistent) |	/event |
+|40014-2 | Cross Site Scripting Weakness (Persistent in JSON Response) |	/comment |
 
 ### XML / XPath / XSLT
 
@@ -63,12 +62,12 @@ Mocked alerts (!!! - temporary not found by scan, in dev):
 | ID / AlertRef | Alert name | Where catch |
 |---|---|---|
 |20019-1 / 20019-2 |	External Redirect |	/vulnApp/externalRedirect |
-|40040-* |	CORS Misconfiguration / CORS Header |	/vulnApp/cors |
+|40040-* |	!!! CORS Misconfiguration / CORS Header |	/vulnApp/cors |
 |40008 |	!!! Parameter Tampering |	/vulnApp/parameterTampering |
 |30001 |	!!! Buffer Overflow |	/vulnApp/bufferOverflow |
 |30002 |	Format String Error |	/vulnApp/formatString |
 |90024 |	!!! Generic Padding Oracle |	/vulnApp/paddingOracle |
-|90028 |	Insecure HTTP Method |	/vulnApp/insecureMethod |
+|90028 |	!!! Insecure HTTP Method |	/vulnApp/insecureMethod |
 
 ### Resource disclosure / hidden files
 
@@ -76,7 +75,7 @@ Mocked alerts (!!! - temporary not found by scan, in dev):
 | ID / AlertRef | Alert name | Where catch |
 |---|---|---|
 |40028 |	!!! ELMAH Information Leak |	/elmah.axd or /vulnApp/elmah.axd |
-|40029 |	Trace.axd Information Leak |	/trace.axd or /vulnApp/trace.axd |
+|40029 |	!!! Trace.axd Information Leak |	/trace.axd or /vulnApp/trace.axd |
 |40032 |	.htaccess Information Leak |	/.htaccess or /vulnApp/.htaccess |
 |40034 |	!!! .env Information Leak	/.env or | /vulnApp/.env |
 |40035 |	Hidden File Found |	/.git/config, /CVS/root, mb /WEB-INF/web.xml |
@@ -89,17 +88,17 @@ Mocked alerts (!!! - temporary not found by scan, in dev):
 |---|---|
 |10020 |	Missing Anti-clickjacking Header |
 |10021 |	X-Content-Type-Options Header Missing |
-|10035 |	Strict-Transport-Security Header Not Set |
+|10035 |	!!! Strict-Transport-Security Header Not Set |
 |10038 |	Content Security Policy Header Not Set |
-|10036 |	Server Leaks Information via ... |
-|10054 |	Cookie without SameSite  |
-|10096 |	Timestamp Disclosure |
+|10036 |	!!! Server Leaks Information via ... |
+|10054 |	!!! Cookie without SameSite  |
+|10096 |	!!! Timestamp Disclosure |
 |40026 | Cross Site Scripting (DOM Based) |
-|40043 | Log4Shell	 |
+|40043 | !!! Log4Shell	 |
 |40045 | !!! Spring4Shell |
 |40048 | !!! React2Shell	нет React Server Components endpoint |
 |90026 | !!! SOAP Action Spoofing / 90029 SOAP XML Injection |
-|50000 | Script Active Scan Rules |
+|50000 | !!! Script Active Scan Rules |
 
 ### **How to run locally:**
 
