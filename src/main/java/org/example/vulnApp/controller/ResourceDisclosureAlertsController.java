@@ -100,7 +100,7 @@ public class ResourceDisclosureAlertsController {
 
     @RequestMapping(value = {"/elmah.axd", "/vulnApp/elmah.axd"}, method = RequestMethod.GET)
     public ResponseEntity<String> elmahLeak() {
-        return html("<html><title>Error log for /</title><body><h1>ELMAH Error Log</h1><table><tr><td>System.Exception</td></tr></table></body></html>");
+        return html("<html><title>Error Log for /</title><body><h1>ELMAH Error Log</h1><table><tr><td>System.Exception</td></tr></table></body></html>");
     }
 
     @RequestMapping(value = {"/trace.axd", "/vulnApp/trace.axd"}, method = RequestMethod.GET)

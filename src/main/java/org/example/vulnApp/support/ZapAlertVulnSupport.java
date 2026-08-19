@@ -1,6 +1,7 @@
 package org.example.vulnApp.support;
 
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,14 @@ public final class ZapAlertVulnSupport {
         "(?i)(?<![A-Za-z0-9_.])sleep\\s*\\(\\s*(\\d+(?:\\.\\d+)?)\\s*\\)|(?<![A-Za-z0-9_.])benchmark\\s*\\("
     );
 
+    /**
+     * ZAP 40020 uses Hypersonic's quoted Java UDF form:
+     * "java.lang.Thread.sleep"(milliseconds). Older/local variants are accepted too.
+     */
     public static final Pattern HSQL_SLEEP_PATTERN = Pattern.compile(
-        "(?i)(?:call\\s+sleep\\s*\\(\\s*(\\d+(?:\\.\\d+)?)\\s*\\)|java\\.lang\\.thread\\.sleep\\s*\\(\\s*(\\d+)\\s*\\))"
+        "(?i)(?:\\\"java\\.lang\\.Thread\\.sleep\\\"\\s*\\(\\s*(\\d+)\\s*\\)"
+            + "|java\\.lang\\.thread\\.sleep\\s*\\(\\s*(\\d+)\\s*\\)"
+            + "|call\\s+sleep\\s*\\(\\s*(\\d+(?:\\.\\d+)?)\\s*\\))"
     );
 
     public static final Pattern MSSQL_WAITFOR_PATTERN = Pattern.compile(
@@ -45,13 +52,25 @@ public final class ZapAlertVulnSupport {
         "(?i)(?:^|[;&|`\\s])(?:sleep\\s+(\\d{1,2})(?:\\b|\\s|$)|timeout(?:\\.exe)?\\s+(?:/t\\s+)?(\\d{1,2})(?:\\b|\\s|$)|ping\\s+(?:-c\\s+(\\d{1,2})|(?:127\\.0\\.0\\.1|localhost)\\s+-n\\s+(\\d{1,2})))"
     );
 
+    /**
+     * Blind SSTI payloads wrap OS commands inside template syntax and normally use "sleep N",
+     * not SQL-style sleep(N). Keep this narrow so SQLi timing payloads do not trigger here.
+     */
     public static final Pattern SSTI_SLEEP_PATTERN = Pattern.compile(
-        "(?i)(?:\\$\\{|#\\{|\\{\\{|<%=).*?(?:thread\\.sleep|sleep)\\s*\\(\\s*(\\d{1,5})\\s*\\)"
+        "(?is)(?:<#assign|#set\\(|global\\.process|__import__|subprocess|system\\(|%x\\(|\\$\\{|#\\{|\\{\\{|<%=).*?sleep\\s*(?:\\(\\s*)?(\\d{1,2})(?:\\s*\\))?"
     );
 
-    public static final Pattern MONGO_WHERE_SLEEP_PATTERN = Pattern.compile(
-        "(?i)\\$where.*?(?:sleep|settimeout)\\s*\\(\\s*(\\d{1,5})\\s*\\)"
+    /** MongoDB time-based ZAP payloads contain JavaScript-ish syntax around sleep(N). */
+    public static final Pattern MONGO_SLEEP_PATTERN = Pattern.compile(
+        "(?is)(?:print\\s*\\(|var\\s+x|hex_md5|md5|mapReduce|\\|\\||0\\)??\\s*;\\s*)[^\\n\\r]*?sleep\\s*\\(\\s*(\\d{1,2}(?:\\.\\d+)?)\\s*\\)"
     );
+
+    public static final Pattern SIMPLE_ARITHMETIC_PATTERN = Pattern.compile(
+        "(\\d{2,7})\\s*([+*])\\s*(\\d{2,7})"
+    );
+
+    public static final String VALID_PADDING_ORACLE_TOKEN_HEX =
+        "ffffffffffffffffffffffffffffff10";
 
     private ZapAlertVulnSupport() {
     }
@@ -60,7 +79,8 @@ public final class ZapAlertVulnSupport {
         double boundedSeconds = Math.min(Math.max(seconds, 0.0), MAX_SLEEP_SECONDS);
         sleepMillis(Math.round(boundedSeconds * 1000.0) + TIMING_MARGIN_MS);
     }
-    public static double firstMatchedNumber(java.util.regex.Matcher matcher) {
+
+    public static double firstMatchedNumber(Matcher matcher) {
         for (int i = 1; i <= matcher.groupCount(); i++) {
             String value = matcher.group(i);
             if (value != null) {
@@ -78,7 +98,6 @@ public final class ZapAlertVulnSupport {
         sleepSecondsWithMargin(value);
     }
 
-
     public static void sleepMillis(long millis) {
         try {
             Thread.sleep(Math.max(0L, millis));
@@ -91,16 +110,20 @@ public final class ZapAlertVulnSupport {
         if (blobBytes < SQLITE_MIN_RANDOMBLOB_BYTES) {
             return 0L;
         }
-        /*
-         * ZAP tries this sequence:
-         * randomblob(100000)
-         * randomblob(1000000)
-         * randomblob(10000000)
-         * We need response time to increase, but not exceed ZAP's SQLite timing budget too much.
-         */
         double ratio = (double) blobBytes / SQLITE_MIN_RANDOMBLOB_BYTES;
         double step = Math.max(1.0, Math.log10(ratio) + 1.0);
         return Math.min(Math.round(step * 900L), SQLITE_MAX_SLEEP_MS);
+    }
+
+    public static String evaluateFirstArithmeticExpression(String value) {
+        Matcher matcher = SIMPLE_ARITHMETIC_PATTERN.matcher(value == null ? "" : value);
+        if (!matcher.find()) {
+            return null;
+        }
+        long left = Long.parseLong(matcher.group(1));
+        long right = Long.parseLong(matcher.group(3));
+        long result = "*".equals(matcher.group(2)) ? left * right : left + right;
+        return String.valueOf(result);
     }
 
     public static String safeLower(String value) {

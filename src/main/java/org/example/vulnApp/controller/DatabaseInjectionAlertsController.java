@@ -61,12 +61,14 @@ public class DatabaseInjectionAlertsController {
     public ResponseEntity<String> sqlInjectionHypersonicTimeBased(@RequestParam("name") String name) {
         Matcher m = HSQL_SLEEP_PATTERN.matcher(name);
         if (m.find()) {
-            String value = m.group(1) != null ? m.group(1) : m.group(2);
-            if (m.group(2) != null) {
-                // java.lang.Thread.sleep payloads usually pass milliseconds.
-                sleepMillis((long) Math.min(Double.parseDouble(value), MAX_SLEEP_SECONDS * 1000.0) + TIMING_MARGIN_MS);
+            if (m.group(1) != null || m.group(2) != null) {
+                // ZAP 40020 replaces <<<<SLEEP>>>> with milliseconds, for example
+                // "java.lang.Thread.sleep"(5000).
+                String millis = m.group(1) != null ? m.group(1) : m.group(2);
+                sleepMillis((long) Math.min(Double.parseDouble(millis), MAX_SLEEP_SECONDS * 1000.0) + TIMING_MARGIN_MS);
             } else {
-                sleepSecondsWithMargin(Double.parseDouble(value));
+                // Compatibility fallback for local/manual CALL SLEEP(seconds) probes.
+                sleepSecondsWithMargin(Double.parseDouble(m.group(3)));
             }
         }
         return text("ok");

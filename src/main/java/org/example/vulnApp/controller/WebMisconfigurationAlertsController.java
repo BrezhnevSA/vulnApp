@@ -1,9 +1,12 @@
 package org.example.vulnApp.controller;
 
+import static org.example.vulnApp.support.ZapAlertVulnSupport.VALID_PADDING_ORACLE_TOKEN_HEX;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.json;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.safeLower;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.text;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,14 +38,22 @@ public class WebMisconfigurationAlertsController {
     }
 
     @RequestMapping(value = "/vulnApp/parameterTampering", method = RequestMethod.GET)
-    public ResponseEntity<String> parameterTampering(@RequestParam("price") String price) {
-        return json("{\"acceptedPrice\":" + price.replaceAll("[^0-9.-]", "") + ",\"status\":\"order-created\"}");
+    public ResponseEntity<String> parameterTampering(@RequestParam(value = "price", required = false) String price) {
+        String value = price == null ? "" : price;
+        if (value.isBlank() || "@".equals(value) || "+".equals(value) || "|".equals(value) || value.indexOf('\0') >= 0) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body("javax.servlet.ServletException: invoke exception while parsing price");
+        }
+        return json("{\"acceptedPrice\":" + value.replaceAll("[^0-9.-]", "") + ",\"status\":\"order-created\"}");
     }
 
     @RequestMapping(value = "/vulnApp/bufferOverflow", method = RequestMethod.GET)
     public ResponseEntity<String> bufferOverflow(@RequestParam("input") String input) {
-        if (input.length() > 4096) {
+        // ZAP 30001 sends a 2100-character random string and requires HTTP 500 plus Connection: close.
+        if (input.length() >= 2100) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .header("Connection", "close")
                 .contentType(MediaType.TEXT_PLAIN)
                 .body("Segmentation fault (core dumped)");
         }
@@ -66,9 +77,28 @@ public class WebMisconfigurationAlertsController {
         return text("fetched " + url);
     }
 
+    @RequestMapping(value = {"/latest/meta-data", "/latest/meta-data/"}, method = RequestMethod.GET)
+    public ResponseEntity<String> awsMetadata() {
+        return text("ami-id\ninstance-id\nlocal-hostname\npublic-hostname\n");
+    }
+
+    @RequestMapping(value = {"/computeMetadata/v1", "/computeMetadata/v1/"}, method = RequestMethod.GET)
+    public ResponseEntity<String> gcpMetadata() {
+        return text("project-id\nzone\nmachineType\nhostname\n");
+    }
+
     @RequestMapping(value = "/vulnApp/paddingOracle", method = RequestMethod.GET)
-    public ResponseEntity<String> paddingOracle(@RequestParam("token") String token) {
-        if (token.length() % 2 == 1) {
+    public ResponseEntity<String> paddingOracle(
+        @Parameter(schema = @Schema(example = VALID_PADDING_ORACLE_TOKEN_HEX))
+        @RequestParam("token") String token
+    ) {
+        if (token == null || token.isBlank()) {
+            return text("empty token accepted");
+        }
+        if (VALID_PADDING_ORACLE_TOKEN_HEX.equalsIgnoreCase(token)) {
+            return text("token accepted");
+        }
+        if (looksLikeEncodedOracleCandidate(token)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.TEXT_PLAIN)
                 .body("javax.crypto.BadPaddingException: Given final block not properly padded");
@@ -79,5 +109,11 @@ public class WebMisconfigurationAlertsController {
     @RequestMapping(value = "/vulnApp/insecureMethod", method = {RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.TRACE})
     public ResponseEntity<String> insecureMethod() {
         return text("method accepted");
+    }
+
+    private boolean looksLikeEncodedOracleCandidate(String token) {
+        return token.matches("(?i)^[a-f0-9]{32,}$")
+            || token.matches("^[a-zA-Z0-9/+]+={0,2}$")
+            || token.matches("^[a-zA-Z0-9_-]+[012]$");
     }
 }

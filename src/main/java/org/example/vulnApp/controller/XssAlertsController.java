@@ -205,4 +205,23 @@ public class XssAlertsController {
     public ResponseEntity<String> csswVulnHtml(@RequestParam(value = "name") String name) {
         return new ResponseEntity<>("<tr><td>Hello " + name + " !</tr></td>\\n", HttpStatus.OK);
     }
+
+
+    /**
+     * Expected: 40026 Cross Site Scripting (DOM Based).
+     * Requires the DOM XSS add-on, Selenium/browser support, and the 40026 rule enabled.
+     */
+    @RequestMapping(value = "/vulnApp/domXss", method = RequestMethod.GET)
+    public ResponseEntity<String> domXss(@RequestParam(value = "name", required = false) String name) {
+        return ResponseEntity.ok()
+            .contentType(MediaType.TEXT_HTML)
+            .body("<html><head><title>DOM XSS</title></head>"
+                + "<body><h1>DOM XSS lab</h1><div id='result'></div>"
+                + "<script>"
+                + "const p=new URLSearchParams(window.location.search);"
+                + "const value=p.get('name') || window.location.hash.substring(1) || '';"
+                + "document.getElementById('result').innerHTML=value;"
+                + "</script></body></html>");
+    }
+
 }

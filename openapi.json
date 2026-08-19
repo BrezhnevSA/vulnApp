@@ -67,6 +67,70 @@
         }
       }
     },
+    "/vulnApp/spring4shell": {
+      "get": {
+        "tags": [
+          "framework-rce-alerts-controller"
+        ],
+        "operationId": "spring4Shell",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "framework-rce-alerts-controller"
+        ],
+        "operationId": "spring4Shell_1",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/vulnApp/cors": {
       "get": {
         "tags": [
@@ -150,6 +214,128 @@
             }
           },
           "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/soap": {
+      "get": {
+        "tags": [
+          "soap-alerts-controller"
+        ],
+        "operationId": "wsdl",
+        "parameters": [
+          {
+            "name": "baseUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "soap-alerts-controller"
+        ],
+        "operationId": "soap",
+        "parameters": [
+          {
+            "name": "SOAPAction",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/react2shell": {
+      "post": {
+        "tags": [
+          "framework-rce-alerts-controller"
+        ],
+        "operationId": "react2Shell",
+        "parameters": [
+          {
+            "name": "Next-Action",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Next-Router-State-Tree",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
         },
         "responses": {
           "200": {
@@ -775,6 +961,166 @@
         }
       }
     },
+    "/vulnApp/passive/timestampDisclosure": {
+      "get": {
+        "tags": [
+          "passive-header-alerts-controller"
+        ],
+        "operationId": "timestampDisclosure",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/passive/serverHeaderLeak": {
+      "get": {
+        "tags": [
+          "passive-header-alerts-controller"
+        ],
+        "operationId": "serverHeaderLeak",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/passive/missingSecurityHeaders": {
+      "get": {
+        "tags": [
+          "passive-header-alerts-controller"
+        ],
+        "operationId": "missingSecurityHeaders",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/passive/hstsOnHttp": {
+      "get": {
+        "tags": [
+          "passive-header-alerts-controller"
+        ],
+        "operationId": "hstsOnHttp",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/passive/errorWithoutNosniff": {
+      "get": {
+        "tags": [
+          "passive-header-alerts-controller"
+        ],
+        "operationId": "errorWithoutNosniff",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/passive/cookieWithoutSameSite": {
+      "get": {
+        "tags": [
+          "passive-header-alerts-controller"
+        ],
+        "operationId": "cookieWithoutSameSite",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/passive/cookieSameSiteNone": {
+      "get": {
+        "tags": [
+          "passive-header-alerts-controller"
+        ],
+        "operationId": "cookieSameSiteNone",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/passive/cookieInvalidSameSite": {
+      "get": {
+        "tags": [
+          "passive-header-alerts-controller"
+        ],
+        "operationId": "cookieInvalidSameSite",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/vulnApp/parameterTampering": {
       "get": {
         "tags": [
@@ -785,7 +1131,7 @@
           {
             "name": "price",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -817,7 +1163,8 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "ffffffffffffffffffffffffffffff10"
             }
           }
         ],
@@ -903,11 +1250,14 @@
         "operationId": "noSqlInjectionMongo",
         "parameters": [
           {
-            "name": "filter",
+            "name": "params",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1064,6 +1414,36 @@
           "resource-disclosure-alerts-controller"
         ],
         "operationId": "elmahLeak_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulnApp/domXss": {
+      "get": {
+        "tags": [
+          "xss-alerts-controller"
+        ],
+        "operationId": "domXss",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1394,6 +1774,86 @@
           "resource-disclosure-alerts-controller"
         ],
         "operationId": "envLeak_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/latest/meta-data/": {
+      "get": {
+        "tags": [
+          "web-misconfiguration-alerts-controller"
+        ],
+        "operationId": "awsMetadata",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/latest/meta-data": {
+      "get": {
+        "tags": [
+          "web-misconfiguration-alerts-controller"
+        ],
+        "operationId": "awsMetadata_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/computeMetadata/v1": {
+      "get": {
+        "tags": [
+          "web-misconfiguration-alerts-controller"
+        ],
+        "operationId": "gcpMetadata",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/computeMetadata/v1/": {
+      "get": {
+        "tags": [
+          "web-misconfiguration-alerts-controller"
+        ],
+        "operationId": "gcpMetadata_1",
         "responses": {
           "200": {
             "description": "OK",

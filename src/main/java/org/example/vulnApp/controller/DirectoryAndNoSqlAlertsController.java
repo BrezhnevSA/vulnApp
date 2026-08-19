@@ -1,11 +1,12 @@
 package org.example.vulnApp.controller;
 
-import static org.example.vulnApp.support.ZapAlertVulnSupport.MONGO_WHERE_SLEEP_PATTERN;
+import static org.example.vulnApp.support.ZapAlertVulnSupport.MONGO_SLEEP_PATTERN;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.json;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.safeLower;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.sleepSecondsOrMillisWithMargin;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.text;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,15 +31,45 @@ public class DirectoryAndNoSqlAlertsController {
     }
 
     @RequestMapping(value = "/vulnApp/noSqlInjectionMongo", method = RequestMethod.GET)
-    public ResponseEntity<String> noSqlInjectionMongo(@RequestParam("filter") String filter) {
-        String lower = safeLower(filter);
-        if (lower.contains("$ne") || lower.contains("$where") || lower.contains("true")) {
-            Matcher m = MONGO_WHERE_SLEEP_PATTERN.matcher(filter);
-            if (m.find()) {
-                sleepSecondsOrMillisWithMargin(Double.parseDouble(m.group(1)));
+    public ResponseEntity<String> noSqlInjectionMongo(@RequestParam Map<String, String> params) {
+        String original = params.getOrDefault("filter", "filter");
+
+        // ZAP 40033 boolean/all-data probes add parameter names such as filter[$ne],
+        // filter[$regex], filter[$gt]. Counter-proof filter[$eq] should look like the baseline.
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue() == null ? "" : entry.getValue();
+            String lowerKey = safeLower(key);
+            String lowerValue = safeLower(value);
+
+            if (lowerKey.contains("[$eq]")) {
+                return baselineMongoResponse(original);
             }
-            return json("{\"users\":[\"admin\",\"guest\",\"zap\"]}");
+            if (lowerKey.contains("[$ne]") || lowerKey.contains("[$regex]") || lowerKey.contains("[$gt]")) {
+                return allDataMongoResponse();
+            }
+            if (lowerValue.contains("$ne") || lowerValue.contains("$regex") || lowerValue.contains("$gt") || lowerValue.contains("true")) {
+                return allDataMongoResponse();
+            }
+
+            Matcher timing = MONGO_SLEEP_PATTERN.matcher(value);
+            if (timing.find()) {
+                sleepSecondsOrMillisWithMargin(Double.parseDouble(timing.group(1)));
+                return json("{\"users\":[\"admin\",\"guest\",\"zap\"],\"timing\":true}");
+            }
+
+            if (lowerValue.contains("runtimeexception") || lowerValue.contains("mongoresultexception") || lowerValue.contains("});") || lowerValue.contains("//")) {
+                return text("MongoResultException: RuntimeException: SyntaxError: unterminated string literal");
+            }
         }
+        return baselineMongoResponse(original);
+    }
+
+    private ResponseEntity<String> baselineMongoResponse(String filter) {
         return json("{\"users\":[\"" + filter.replace("\"", "'") + "\"]}");
+    }
+
+    private ResponseEntity<String> allDataMongoResponse() {
+        return json("{\"users\":[\"admin\",\"guest\",\"zap\"]}");
     }
 }
