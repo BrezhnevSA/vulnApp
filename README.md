@@ -78,7 +78,7 @@ Mocked alerts (!!! - temporary not found by scan, in dev):
 | 40042           | !!! Spring Actuator Information Leak                                      | /actuator/env, /actuator/heapdump              |
 | 10045 / 10045-2 | !!! Source Code Disclosure - /WEB-INF folder / Properties File Disclosure | /WEB-INF folder                                |
 
-### Possible alerts
+### Alerts without group
 
 | ID / AlertRef | Alert name                                                               | Where catch                                                                  |
 |---------------|--------------------------------------------------------------------------|------------------------------------------------------------------------------|
