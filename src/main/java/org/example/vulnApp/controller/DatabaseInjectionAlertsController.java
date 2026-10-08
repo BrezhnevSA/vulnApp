@@ -13,6 +13,7 @@ import static org.example.vulnApp.support.ZapAlertVulnSupport.safeLower;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.sleepMillis;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.sleepSecondsWithMargin;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.sqliteRandomblobDelayMillis;
+import static org.example.vulnApp.support.ZapAlertVulnSupport.sqliteRandomblobBytes;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.text;
 
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,7 +43,8 @@ public class DatabaseInjectionAlertsController {
     public ResponseEntity<String> sqlInjectionGeneric(@RequestParam("name") String name) {
         String lower = safeLower(name);
         if (lower.contains("'") || lower.contains("--") || lower.contains(" or ") || lower.contains(" union ")) {
-            return text("You have an error in your SQL syntax near '" + name + "' at line 1");
+            // Keep this endpoint DB-neutral so rule 40018 can raise the generic SQL Injection alert.
+            return text("java.sql.SQLException: syntax error while executing query near '" + name + "'");
         }
         return text("user=" + name);
     }
@@ -143,7 +145,8 @@ public class DatabaseInjectionAlertsController {
         if (!match.find()) {
             return new ResponseEntity<>(name, HttpStatus.OK);
         }
-        sleepMillis(Long.parseLong(match.group(1)) * 1000L + TIMING_MARGIN_MS);
+        final double requestedSeconds = Math.min(Double.parseDouble(match.group(1)), MAX_SLEEP_SECONDS);
+        sleepMillis(Math.round(requestedSeconds * 1000.0) + 250L);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -170,7 +173,7 @@ public class DatabaseInjectionAlertsController {
         System.out.println("SQLite SQLi param name = " + name);
         final Matcher randomblob = SQLITE_RANDOMBLOB_PATTERN.matcher(name);
         if (randomblob.find()) {
-            final long blobBytes = Long.parseLong(randomblob.group(1));
+            final long blobBytes = sqliteRandomblobBytes(randomblob);
             final long sleepMillis = sqliteRandomblobDelayMillis(blobBytes);
             System.out.println("SQLite SQLi randomblob bytes=" + blobBytes + ", sleep=" + sleepMillis + "ms");
             sleepMillis(sleepMillis);
@@ -182,7 +185,7 @@ public class DatabaseInjectionAlertsController {
     public ResponseEntity<String> sqlInjectionSqLiteTimeBased(@RequestParam("name") String name) {
         Matcher m = SQLITE_RANDOMBLOB_PATTERN.matcher(name);
         if (m.find()) {
-            sleepMillis(sqliteRandomblobDelayMillis(Long.parseLong(m.group(1))));
+            sleepMillis(sqliteRandomblobDelayMillis(sqliteRandomblobBytes(m)));
         }
         return text("ok");
     }

@@ -203,7 +203,23 @@ public class XssAlertsController {
     )
     @RequestMapping(value = "/vulnApp/cssw/html", method = RequestMethod.GET)
     public ResponseEntity<String> csswVulnHtml(@RequestParam(value = "name") String name) {
-        return new ResponseEntity<>("<tr><td>Hello " + name + " !</tr></td>\\n", HttpStatus.OK);
+        return ResponseEntity.ok()
+            .contentType(MediaType.TEXT_HTML)
+            .body("<!doctype html><html><body><div id='name'>Hello " + name + " !</div></body></html>");
+    }
+
+    /**
+     * Expected at LOW threshold for rule 40012: Cross Site Scripting Weakness
+     * (Reflected in JSON Response).
+     */
+    @RequestMapping(value = "/vulnApp/reflectedXssJson", method = RequestMethod.GET)
+    public ResponseEntity<String> reflectedXssJson(@RequestParam(value = "name") String name) {
+        // Match the shape used by ZAP's own CrossSiteScriptingScanRule JSON unit test:
+        // reflect the tainted value as a plain JSON string value, not inside HTML markup.
+        // The dedicated JSON alert is emitted only when rule 40012 uses threshold LOW.
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{ \"name\":\"" + name + "\", \"age\":30, \"car\":null }");
     }
 
 

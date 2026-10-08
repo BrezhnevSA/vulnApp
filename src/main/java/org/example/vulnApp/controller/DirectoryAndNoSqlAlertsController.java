@@ -6,6 +6,7 @@ import static org.example.vulnApp.support.ZapAlertVulnSupport.safeLower;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.sleepSecondsOrMillisWithMargin;
 import static org.example.vulnApp.support.ZapAlertVulnSupport.text;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Map;
 import java.util.regex.Matcher;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +32,11 @@ public class DirectoryAndNoSqlAlertsController {
     }
 
     @RequestMapping(value = "/vulnApp/noSqlInjectionMongo", method = RequestMethod.GET)
-    public ResponseEntity<String> noSqlInjectionMongo(@RequestParam Map<String, String> params) {
-        String original = params.getOrDefault("filter", "filter");
+    public ResponseEntity<String> noSqlInjectionMongo(
+        @RequestParam(value = "filter", required = false, defaultValue = "baseline") String filter,
+        @Parameter(hidden = true) @RequestParam Map<String, String> params
+    ) {
+        String original = filter;
 
         // ZAP 40033 boolean/all-data probes add parameter names such as filter[$ne],
         // filter[$regex], filter[$gt]. Counter-proof filter[$eq] should look like the baseline.

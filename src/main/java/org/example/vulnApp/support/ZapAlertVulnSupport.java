@@ -11,8 +11,7 @@ public final class ZapAlertVulnSupport {
     public static final double MAX_SLEEP_SECONDS = 60.0;
 
     public static final Pattern POSTGRES_SLEEP_PATTERN = Pattern.compile(
-        "^case\\s+when\\s+cast\\(pg_sleep\\((\\d+)(?:\\.\\d+)?\\)\\s+as\\s+varchar\\)"
-            + "\\s+>\\s+''\\s+then\\s+0\\s+else\\s+1\\s+end"
+        "(?i)pg_sleep\\s*\\(\\s*(\\d+(?:\\.\\d+)?)\\s*\\)"
     );
 
     public static final Pattern ORACLE_SLEEP_PATTERN = Pattern.compile(
@@ -41,7 +40,7 @@ public final class ZapAlertVulnSupport {
     );
 
     public static final Pattern SQLITE_RANDOMBLOB_PATTERN = Pattern.compile(
-        "randomblob\\s*\\(\\s*(\\d+)\\s*\\)",
+        "randomblob\\s*\\(\\s*(\\d+)(?:\\s*/\\s*(\\d+))?\\s*\\)",
         Pattern.CASE_INSENSITIVE
     );
 
@@ -113,6 +112,15 @@ public final class ZapAlertVulnSupport {
         double ratio = (double) blobBytes / SQLITE_MIN_RANDOMBLOB_BYTES;
         double step = Math.max(1.0, Math.log10(ratio) + 1.0);
         return Math.min(Math.round(step * 900L), SQLITE_MAX_SLEEP_MS);
+    }
+
+    public static long sqliteRandomblobBytes(Matcher matcher) {
+        long numerator = Long.parseLong(matcher.group(1));
+        if (matcher.groupCount() >= 2 && matcher.group(2) != null) {
+            long divisor = Math.max(1L, Long.parseLong(matcher.group(2)));
+            return numerator / divisor;
+        }
+        return numerator;
     }
 
     public static String evaluateFirstArithmeticExpression(String value) {

@@ -73,9 +73,27 @@ public class ResourceDisclosureAlertsController {
 
     // Hidden File Found
     @Hidden
-    @RequestMapping(value = {"/CVS/root", "/vulnApp/CVS/root"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/CVS/root", "/CVS/Root", "/vulnApp/CVS/root", "/vulnApp/CVS/Root"}, method = RequestMethod.GET)
     public ResponseEntity<String> hiddenCvsRoot() {
         return text(":pserver:build-user@source.internal:/srv/vuln-app");
+    }
+
+    /**
+     * HiddenFilesScanRule always checks these built-in fallback names even when
+     * ZAP's json/hidden_files.json was not installed/extracted with the add-on.
+     */
+    @Hidden
+    @RequestMapping(
+        value = {
+            "/.hg", "/vulnApp/.hg",
+            "/.bzr", "/vulnApp/.bzr",
+            "/._darcs", "/vulnApp/._darcs",
+            "/BitKeeper", "/vulnApp/BitKeeper"
+        },
+        method = RequestMethod.GET
+    )
+    public ResponseEntity<String> hiddenFileFallback() {
+        return text("vulnApp hidden repository metadata - intentionally exposed");
     }
 
     @RequestMapping(value = {"/.env", "/vulnApp/.env"}, method = RequestMethod.GET)
@@ -91,6 +109,20 @@ public class ResourceDisclosureAlertsController {
     @RequestMapping(value = {"/.git/config", "/vulnApp/.git/config"}, method = RequestMethod.GET)
     public ResponseEntity<String> gitConfigLeak() {
         return text("[core]\n\trepositoryformatversion = 0\n[remote \"origin\"]\n\turl = git@github.com:example/private.git");
+    }
+
+
+
+    @Hidden
+    @RequestMapping(value = {"/.git/HEAD", "/vulnApp/.git/HEAD"}, method = RequestMethod.GET)
+    public ResponseEntity<String> gitHeadLeak() {
+        return text("ref: refs/heads/main\n");
+    }
+
+    @Hidden
+    @RequestMapping(value = {"/.svn/entries", "/vulnApp/.svn/entries"}, method = RequestMethod.GET)
+    public ResponseEntity<String> svnEntriesLeak() {
+        return text("10\ndir\n\nhttps://svn.example.internal/repos/vulnApp\n");
     }
 
     @RequestMapping(value = {"/WEB-INF/web.xml", "/vulnApp/WEB-INF/web.xml"}, method = RequestMethod.GET)

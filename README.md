@@ -113,6 +113,21 @@ Mocked alerts (!!! - temporary not found by scan, in dev):
 | 90027         | Cookie Slack Detector                                                    | different                                                                    |
 | 90028-1       | Insecure HTTP Method - DELETE                                            | /app/vulnApp/insecureMethod                                                  |
 
+### Required coverage added (2026-10-06)
+
+| Required class                | ZAP alert / fixture               | Endpoint / requirement                                                                                                                   |
+|-------------------------------|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| Vulnerable standard component | Retire.js / Vulnerable JS Library | root page loads `/app/jquery-1.8.3.min.js`                                                                                               |
+| Reflected XSS                 | 40012                             | `/app/vulnApp/cssw/html?name=baseline`                                                                                                   |
+| Reflected XSS in JSON         | 40012 JSON variant                | `/app/vulnApp/reflectedXssJson?name=baseline`; rule threshold must be **LOW**                                                            |
+| XXE                           | 90023                             | POST `/app/vulnApp/xxe`; OpenAPI now supplies a valid XML baseline                                                                       |
+| Insecure Serialization        | 90002 Java Serialized Object      | `/app/vulnApp/passive/javaSerializedObject`                                                                                              |
+| JS Prototype Pollution        | 210008 family                     | `/app/vulnApp/prototypePollution?key=__proto__&prop=headers&value=ptk-polluted`; requires OWASP PTK IAST + Client Spider/PTK Active Scan |
+| Debug Error Messages          | 10023                             | `/app/vulnApp/passive/debugErrorMessage`                                                                                                 |
+| Sensitive Information in URL  | 10024                             | `/app/vulnApp/passive/sensitiveUrl?email=qa.user@example.com`                                                                            |
+| Suspicious Comments           | 10027                             | `/app/vulnApp/passive/suspiciousComments`                                                                                                |
+| Hidden File Found             | 40035                             | host-root fixtures `/.hg`, `/.bzr`, `/._darcs`, `/BitKeeper`, `/CVS/root`, `/.git/HEAD` are created by the Docker image                  |
+
 ### **How to run locally:**
 
 - Run in cmd:

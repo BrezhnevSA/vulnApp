@@ -23,26 +23,48 @@ public class AppUtilityController {
         return ResponseEntity.ok()
             .contentType(MediaType.TEXT_HTML)
             .body(
-                "<html><body>"
-                    + "<a href='event'>Stored events</a>"
-                    + "<form action='event' method='post'>"
-                    + "<input name='value' value='event'><button>Store event</button>"
+                "<!doctype html><html><head><meta charset='UTF-8'><title>vulnApp XXE</title></head><body>"
+                    + "<h1>vulnApp XXE test</h1>"
+                    + "<p><a id='xxeFixtureLink' href='/app/vulnApp/xxeBrowserFixture'>Open XXE browser fixture</a></p>"
+                    + "<p><a href=\"/app/vulnApp/prototypePollution?key=__proto__&amp;prop=headers&amp;value=ptk-polluted\">Prototype pollution lab</a></p>"
+                    + "</body></html>"
+            );
+    }
+
+    @Hidden
+    @RequestMapping(value = "/vulnApp/xxeBrowserFixture", method = RequestMethod.GET)
+    public ResponseEntity<String> xxeBrowserFixture() {
+        return ResponseEntity.ok()
+            .contentType(MediaType.TEXT_HTML)
+            .body(
+                "<!doctype html><html><head><meta charset='UTF-8'><title>XXE test</title></head><body>"
+                    + "<h1>XXE XML test</h1>"
+                    + "<p>This page intentionally sends an XML request so ZAP AJAX Spider records "
+                    + "an application/xml POST for active scan rule 90023.</p>"
+                    + "<form id='xxeForm'>"
+                    + "<label for='xmlPayload'>XML payload</label><br>"
+                    + "<textarea id='xmlPayload' rows='8' cols='90'>&lt;?xml version=&quot;1.0&quot;?&gt;&lt;foo&gt;baseline&lt;/foo&gt;</textarea><br>"
+                    + "<button id='sendXxe' type='submit'>Send XML</button>"
                     + "</form>"
-                    + "<a href='vulnApp/sqlInjectionOracleTimeBased?name=test'>Oracle query</a>"
-                    + "<a href='vulnApp/sqlInjectionHypersonicTimeBased?name=test'>Hypersonic query</a>"
-                    + "<a href='vulnApp/xpathInjection?name=test'>XPath query</a>"
-                    + "<a href='vulnApp/serverSideTemplateInjection?template=template'>SSTI query</a>"
-                    + "<a href='vulnApp/expressionLanguageInjection?expr=value'>EL query</a>"
-                    + "<a href='vulnApp/noSqlInjectionMongo?filter=filter'>Mongo query</a>"
-                    + "<a href='vulnApp/ssrf?url=http://example.org/'>SSRF query</a>"
-                    + "<a href='vulnApp/parameterTampering?price=10'>Parameter tampering query</a>"
-                    + "<a href='vulnApp/bufferOverflow?input=abc'>Buffer query</a>"
-                    + "<a href='vulnApp/paddingOracle?token=ffffffffffffffffffffffffffffff10'>Padding oracle query</a>"
-                    + "<a href='.env'>Env file</a>"
-                    + "<a href='elmah.axd'>ELMAH</a>"
-                    + "<a href='WEB-INF/web.xml'>WEB-INF</a>"
-                    + "<a href='actuator/health'>Actuator health</a>"
-                    + "<a href='vulnApp/xsltInjection?template=text'>XSLT transform</a>"
+                    + "<h2>Response</h2><pre id='status'>Waiting...</pre>"
+                    + "<script>"
+                    + "(function(){"
+                    + "var form=document.getElementById('xxeForm');"
+                    + "var payload=document.getElementById('xmlPayload');"
+                    + "var status=document.getElementById('status');"
+                    + "function sendXml(){"
+                    + "status.textContent='Sending application/xml POST...';"
+                    + "return fetch('xxeBrowserSeed',{method:'POST',"
+                    + "headers:{'Content-Type':'application/xml','Accept':'text/plain'},"
+                    + "body:payload.value,credentials:'same-origin'})"
+                    + ".then(function(r){return r.text().then(function(t){"
+                    + "status.textContent='HTTP '+r.status+'\\n'+t;return r;});})"
+                    + ".catch(function(e){status.textContent='Request failed: '+e;});"
+                    + "}"
+                    + "form.addEventListener('submit',function(e){e.preventDefault();sendXml();});"
+                    + "window.addEventListener('load',function(){setTimeout(sendXml,250);});"
+                    + "})();"
+                    + "</script>"
                     + "</body></html>"
             );
     }
